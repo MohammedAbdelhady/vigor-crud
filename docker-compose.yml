@@ -1,0 +1,47 @@
+version: '3.7'
+
+services:
+  vigor_student_frontend:
+    container_name: vigor_student_frontend
+    build: 
+      context: ./students-frontend
+    restart: always
+    ports:
+      - 8080:80
+    networks:
+      - vigor-network
+    depends_on:
+      - vigor_student_backend
+
+  vigor_student_backend:
+    container_name: vigor_student_backend
+    build: ./students-backend
+    restart: always
+    environment:
+      - DATABASE_URL=postgres://vigor:vigor_pass@vigor_db:5432/vigor?schema=public
+    working_dir: /home/node/app
+    ports:
+      - 3000:3000
+    networks:
+      - vigor-network
+    depends_on:
+      - vigor_db
+
+  vigor_db:
+    container_name: vigor_db
+    image: postgres:14
+    restart: always
+    environment:
+      - POSTGRES_DB=vigor
+      - POSTGRES_USER=vigor
+      - POSTGRES_PASSWORD=vigor_pass
+    networks:
+      - vigor-network
+    volumes:
+      - vigor_student_db2:/var/lib/postgresql/data
+
+volumes:
+  vigor_student_db2:
+
+networks:
+  vigor-network:
